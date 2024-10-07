@@ -3,7 +3,7 @@ echo "building cdf..."; \
 cc $0 -o cdf;           \
 exit 0
 
-// Yeah, I know, this is the most scuffed thing you've ever seen in a C file.
+// Yeah, I know, this is the most ridiculous thing you've ever seen in a C file.
 
 
 
@@ -247,6 +247,7 @@ main(int argc, char **argv) {
     // rebuild this file, if the config header has been modified
     if (compare_filemodtime(configname, *argv)) rebuild(argv);
 
+    printf("compiler: %s\n", cc); // TODO: remove this
 
     if (argc == 1)
         puts("no subcommand specified");
