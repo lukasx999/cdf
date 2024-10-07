@@ -1,6 +1,6 @@
 //bin/true;             \
 echo "building cdf..."; \
-cc $0 -o cdf;           \
+cc $0 -o cdf -ggdb;     \
 exit 0
 
 // Yeah, I know, this is the most ridiculous thing you've ever seen in a C file.
@@ -39,7 +39,7 @@ exit 0
 
 
 char**
-construct_cmdline(size_t *out_len,     const char *cc,
+construct_cmdline(const char *cc,
                   const char **units,  size_t units_len,
                   const char **cflags, size_t cflags_len,
                   const char **libs,   size_t libs_len) {
@@ -49,8 +49,7 @@ construct_cmdline(size_t *out_len,     const char *cc,
     if (*cflags == NULL) cflags_len = 0;
     if (*libs   == NULL) libs_len   = 0;
 
-
-    size_t length = 1 + units_len + cflags_len + libs_len;
+    size_t length = 1 + units_len + cflags_len + libs_len + 1; // <- NULL at the end
 
     char **cmdline = malloc(length * sizeof(char*));
 
@@ -64,9 +63,9 @@ construct_cmdline(size_t *out_len,     const char *cc,
     cmdline[offset] = (char*) cc; ++offset;
     memcpy(cmdline+offset, units,  units_len  * sizeof(char*)); offset += units_len;
     memcpy(cmdline+offset, cflags, cflags_len * sizeof(char*)); offset += cflags_len;
-    memcpy(cmdline+offset, libs,   libs_len   * sizeof(char*));
+    memcpy(cmdline+offset, libs,   libs_len   * sizeof(char*)); offset += libs_len;
+    cmdline[offset] = NULL; // execvp expects NULL-terminated array
 
-    *out_len = length;
     return cmdline;
 
 }
@@ -77,16 +76,14 @@ construct_cmdline(size_t *out_len,     const char *cc,
 void
 build(void) {
 
-    size_t cmdline_len;
-    char **cmdline = construct_cmdline(&cmdline_len, cc,
+    char **cmdline = construct_cmdline(cc,
                                        translation_units, GET_SIZE(translation_units),
                                        cflags,            GET_SIZE(cflags),
                                        libs,              GET_SIZE(libs));
 
-    // puts("cmdline:");
-    // for (size_t i = 0; i < cmdline_len; ++i)
-    //     printf("%s ", cmdline[i]);
-    // puts("");
+    for (size_t i = 0; cmdline[i] != NULL; ++i)
+        printf("%s ", cmdline[i]);
+    puts("");
 
 
     if (!fork()) {
@@ -116,7 +113,7 @@ print_usage(void) {
 
 static void
 create_file(char *filename, char *content) {
-    FILE *f = fopen(filename, "w");
+    FILE *f = fopen(filename, "wx");
 
     if (f == NULL) {
         perror("Failed to open file");
@@ -227,7 +224,7 @@ rebuild(char **argv) {
     puts("rebuilding cdf...");
 
     if (!fork()) {
-        int err = execlp("gcc", "gcc", __FILE_NAME__, "-o", "cdf", NULL);
+        int err = execlp("gcc", "gcc", __FILE_NAME__, "-o", "cdf", "-ggdb", NULL);
         if (err == -1) {
             perror("Failed to rebuild");
             exit(1);
@@ -247,6 +244,7 @@ main(int argc, char **argv) {
     // rebuild this file, if the config header has been modified
     if (compare_filemodtime(configname, *argv)) rebuild(argv);
 
+    // TODO: rebuild when cdf.c is changed
     printf("compiler: %s\n", cc); // TODO: remove this
 
     if (argc == 1)
@@ -260,6 +258,8 @@ main(int argc, char **argv) {
 
     else if (argc == 2 && !strcmp(argv[1], "init"))
         cdf_init();
+        // TODO: dont override existing config.h and main.c
+        // TODO: add config.h file template
 
     else if (argc == 2 && !strcmp(argv[1], "new"))
         assert(!"tbd"); // TODO: this
