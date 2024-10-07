@@ -3,7 +3,7 @@ echo "building cdf..."; \
 cc $0 -o cdf;           \
 exit 0
 
-// Yeah, I know, this is the most scuffed thing you've ever seen in C file.
+// Yeah, I know, this is the most scuffed thing you've ever seen in a C file.
 
 
 
