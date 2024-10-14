@@ -30,7 +30,6 @@ exit 0
 #ifndef CDF_HEADER
 
 
-#include "cdfconfig.h"
 
 #define GET_SIZE(array) (size_t) (sizeof((array)) / sizeof((*array)))
 #define BUFSIZE_BIG 3000
@@ -74,12 +73,8 @@ construct_cmdline(const char *cc,
 
 
 void
-build(void) {
+build(char **cmdline) {
 
-    char **cmdline = construct_cmdline(cc,
-                                       translation_units, GET_SIZE(translation_units),
-                                       cflags,            GET_SIZE(cflags),
-                                       libs,              GET_SIZE(libs));
 
     for (size_t i = 0; cmdline[i] != NULL; ++i)
         printf("%s ", cmdline[i]);
@@ -87,7 +82,7 @@ build(void) {
 
 
     if (!fork()) {
-        int err = execvp(cc, cmdline);
+        int err = execvp(cmdline[0], cmdline);
         if (err == -1) {
             perror("Failed to build");
             exit(1);
@@ -238,8 +233,27 @@ rebuild(char **argv) {
 
 
 
+void
+cdf_config(void) {
+}
+
+
+
+
 int
 main(int argc, char **argv) {
+
+    #include "cdfconfig.h"
+
+    char **cmdline = construct_cmdline(cc,
+                                       translation_units, GET_SIZE(translation_units),
+                                       cflags,            GET_SIZE(cflags),
+                                       libs,              GET_SIZE(libs));
+
+
+
+
+
 
     // rebuild this file, if the config header has been modified
     if (compare_filemodtime(configname, *argv)) rebuild(argv);
@@ -268,7 +282,7 @@ main(int argc, char **argv) {
         assert(!"tbd"); // TODO: this
 
     else if (!strcmp(argv[1], "build"))
-        build();
+        build(cmdline);
 
     else
         puts("unknown subcommand");
