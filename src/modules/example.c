@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "./vector.h"
-#include "./smart_printing.h"
+#include "./printing.h"
 #include "./colors.h"
 
 void call(void *arg) {
