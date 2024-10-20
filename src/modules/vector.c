@@ -9,9 +9,11 @@
 
 
 
-
 void
-vec_init(vec_Vector *v, size_t element_size, size_t start_capacity, size_t growth_rate) {
+vec_init(vec_Vector *v,
+         size_t      element_size,
+         size_t      start_capacity,
+         size_t      growth_rate) {
 
     assert(v != NULL);
     assert(growth_rate != 0);
@@ -25,6 +27,21 @@ vec_init(vec_Vector *v, size_t element_size, size_t start_capacity, size_t growt
     assert(v->blob != NULL);
 
 }
+
+
+vec_Vector
+vec_new(size_t element_size, size_t start_capacity, size_t growth_rate) {
+
+    assert(growth_rate != 0);
+    assert(element_size != 0);
+
+    vec_Vector new = { 0 };
+    vec_init(&new, element_size, start_capacity, growth_rate);
+    return new;
+
+}
+
+
 
 void
 vec_push(vec_Vector *v, void *value) {
@@ -44,6 +61,21 @@ vec_push(vec_Vector *v, void *value) {
 
 }
 
+void
+vec_multipush(vec_Vector *v, ...) {
+    assert(v != NULL);
+
+    va_list args;
+    va_start(args, v);
+
+    for (;;) {
+        void *value = va_arg(args, void*);
+        if (value == NULL) break;
+        vec_push(v, value);
+    }
+
+    va_end(args);
+}
 
 void*
 vec_get(vec_Vector *v, size_t index) {
@@ -147,7 +179,6 @@ vec_pop(vec_Vector *v) {
 
 }
 
-
 int
 vec_extend(vec_Vector *this, vec_Vector *other) {
     assert(this != NULL);
@@ -161,22 +192,6 @@ vec_extend(vec_Vector *this, vec_Vector *other) {
     }
     return 0;
 
-}
-
-void
-vec_literal(vec_Vector *v, ...) {
-    assert(v != NULL);
-
-    va_list args;
-    va_start(args, v);
-
-    for (;;) {
-        void *value = va_arg(args, void*);
-        if (value == NULL) break;
-        vec_push(v, value);
-    }
-
-    va_end(args);
 }
 
 ssize_t
@@ -213,6 +228,14 @@ vec_clear(vec_Vector *v) {
 
     vec_destroy(v);
     vec_init(v, v->element_size, v->start_capacity, v->growth_rate);
+}
+
+void
+vec_foreach(vec_Vector *v, vec_callback_t callback) {
+
+    for (size_t i = 0; i < v->size; ++i)
+        callback(vec_get(v, i));
+
 }
 
 void
