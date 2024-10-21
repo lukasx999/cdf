@@ -8,8 +8,6 @@
 #include <sys/types.h>
 
 
-// TODO: 2D vectors
-// TODO: vec_index with complex datatypes (structs, ...)
 // TODO: implement vec_get_wrap for wraparound indexing
 // TODO: slice
 // TODO: add more literal macros for more insert operations
@@ -51,6 +49,7 @@ extern void       vec_destroy       (vec_Vector *v);                            
 
 
 // allows for pushing literals to a vector, without having to declare them as lvalues first
+// only works with primitive literals, no compound literals
 // vector  ... address of the vector
 // literal ... any literal
 #define VEC_PUSH(vector, literal) {  \
