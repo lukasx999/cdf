@@ -20,10 +20,10 @@ vec_init(vec_Vector *v,
     assert(element_size != 0);
 
     v->size         = 0;
-    v->capacity     = v->start_capacity = start_capacity;
+    v->_capacity     = v->_start_capacity = start_capacity;
     v->element_size = element_size;
-    v->growth_rate  = growth_rate;
-    v->blob         = calloc(v->capacity, v->element_size);
+    v->_growth_rate  = growth_rate;
+    v->blob         = calloc(v->_capacity, v->element_size);
     assert(v->blob != NULL);
 
 }
@@ -49,9 +49,9 @@ vec_push(vec_Vector *v, void *value) {
     assert(v != NULL);
     assert(value != NULL);
 
-    if (v->size+1 == v->capacity) {
-        v->capacity *= v->growth_rate;
-        v->blob = realloc(v->blob, v->capacity * v->element_size);
+    if (v->size+1 == v->_capacity) {
+        v->_capacity *= v->_growth_rate;
+        v->blob = realloc(v->blob, v->_capacity * v->element_size);
         assert(v->blob != NULL);
     }
 
@@ -134,8 +134,8 @@ vec_insert_before(vec_Vector *v, size_t index, void *value) {
     if (index > v->size)
         return -1;
 
-    ++v->capacity;
-    v->blob = realloc(v->blob, v->capacity * v->element_size);
+    ++v->_capacity;
+    v->blob = realloc(v->blob, v->_capacity * v->element_size);
     assert(v->blob != NULL);
 
     void *dest      = v->blob + (index+1) * v->element_size;
@@ -156,8 +156,8 @@ vec_insert_after(vec_Vector *v, size_t index, void *value) {
     if (index > v->size)
         return -1;
 
-    ++v->capacity;
-    v->blob = realloc(v->blob, v->capacity * v->element_size);
+    ++v->_capacity;
+    v->blob = realloc(v->blob, v->_capacity * v->element_size);
     assert(v->blob != NULL);
 
     void *dest      = v->blob + (index+2) * v->element_size;
@@ -215,7 +215,7 @@ vec_Vector
 vec_copy(vec_Vector *v, int *err) {
 
     vec_Vector new;
-    vec_init(&new, v->element_size, v->start_capacity, v->growth_rate);
+    vec_init(&new, v->element_size, v->_start_capacity, v->_growth_rate);
     int s = vec_extend(&new, v);
     if (err != NULL) *err = s;
     return new;
@@ -227,7 +227,7 @@ vec_clear(vec_Vector *v) {
     assert(v != NULL);
 
     vec_destroy(v);
-    vec_init(v, v->element_size, v->start_capacity, v->growth_rate);
+    vec_init(v, v->element_size, v->_start_capacity, v->_growth_rate);
 }
 
 void

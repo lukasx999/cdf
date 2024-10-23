@@ -18,11 +18,11 @@ typedef char vec_blob_t; // pointer arithmetic on voidptrs is undefined => incre
 typedef void(*vec_callback_t)(void *);
 
 typedef struct {
-    size_t capacity,
-           start_capacity,
+    size_t _capacity,
+           _start_capacity,
            size,
            element_size,
-           growth_rate;
+           _growth_rate;
 
     vec_blob_t *blob; // using char* instead of void* for pointer arith
 
