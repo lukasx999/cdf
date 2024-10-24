@@ -9,7 +9,7 @@
 
 #define _DEBUG(var, fmt) fprintf(stderr, "%s=" fmt "\n", (#var), (var))
 
-#define PRINT(var) _Generic((var),        \
+#define PRINT(var) _Generic((var),         \
              int     : _DEBUG(var, "%d" ), \
              size_t  : _DEBUG(var, "%lu"), \
              bool    : _DEBUG(var, "%b" ), \
