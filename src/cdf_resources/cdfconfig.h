@@ -15,6 +15,8 @@ enum {
     MOD_SMARTPRINTING,
     MOD_VECTOR,
     MOD_HASHTABLE,
+    MOD_COLORS,
+    MOD_ERROR,
 };
 
 
@@ -23,6 +25,8 @@ static bool modules[]   = {
     [MOD_SMARTPRINTING] = 1,
     [MOD_VECTOR]        = 1,
     [MOD_HASHTABLE]     = 0,
+    [MOD_COLORS]        = 0,
+    [MOD_ERROR]         = 0,
 };
 
 // EXPORT(cc, translation_units, cflags, libs)
