@@ -1,15 +1,16 @@
 #pragma once
-#ifndef _`name`_H
-#define _`name`_H
+#ifndef _header_H
+#define _header_H
 
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 
 
 
 
 
-#endif // _`name`_H
+#endif // _header_H

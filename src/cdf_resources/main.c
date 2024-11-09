@@ -43,12 +43,29 @@ string_append(String *s, char new) {
 void
 string_delete(String *s, size_t index) {
 
-    const void *src = s->str + index+1;
+    const void *src = s->str + index + 1;
     void *dest = s->str + index;
-    size_t n = (s->size - index-2) * sizeof(char);
+    size_t n = (s->size - index - 1) * sizeof(char);
 
     memmove(dest, src, n);
     --s->size;
+
+}
+
+void
+string_insert_before(String *s, size_t index, char new) {
+
+    ++s->size;
+    ++s->_capacity;
+    s->str = realloc(s->str, s->_capacity * sizeof(char));
+
+    const void *src = s->str + index;
+    void *dest = s->str + index + 1;
+    size_t n = (s->size - index - 1) * sizeof(char);
+
+    memmove(dest, src, n);
+
+    s->str[index] = new;
 
 }
 
@@ -116,50 +133,50 @@ template_init(void) {
 }
 
 
-// returns the absolute position of `query`
-// returns -1 if no matching query was found
-static ssize_t
-lookahead(size_t position, char query, const char *contents) {
 
-    // lookahead
-    for (size_t j = position; j < strlen(contents); ++j)
-        if (contents[j] == query)
-            return j;
-
-    return -1;
-
-}
-
-
-
-
-// replace a variable
+// replace all occurances of `query` with `replacement` inside of `contents`
 // eg: `var`
 static void
 replace(const char *query, const char *replacement, String *contents) {
 
-    // for (size_t i = 0; i < strlen(contents); ++i) {
-        // ssize_t skip = lookahead(i, '`', contents);
+    // add backticks to beginning and end of query
+    char query_buf[BUFSIZE] = { 0 };
+    snprintf(query_buf, BUFSIZE, "`%s`", query);
 
-    char *offset = strstr(contents->str, query);
-    ptrdiff_t skip = offset - contents->str;
-    printf("skip: %lu\n", skip);
+    for (;;) {
 
+        char *offset = strstr(contents->str, query_buf);
 
+        if (offset == NULL)
+            break;
+
+        ptrdiff_t skip = offset - contents->str;
+
+        for (size_t _ = 0; _ < strlen(query_buf); ++_)
+            string_delete(contents, skip);
+
+        for (ssize_t i = strlen(replacement) - 1; i >= 0; --i)
+            string_insert_before(contents, skip, replacement[i]);
+
+    }
 
 }
 
 
 void
 template_add(const char *name) {
+
     String contents_header = read_file("./templates/new_header.h");
     String contents_source = read_file("./templates/new_source.c");
-
 
     replace("name", name, &contents_header);
     char buf[BUFSIZE] = { 0 };
     snprintf(buf, BUFSIZE, "%s.h", name);
     create_file(buf, contents_header.str);
+
+    replace("header", name, &contents_source);
+    snprintf(buf, BUFSIZE, "%s.c", name);
+    create_file(buf, contents_source.str);
 
     string_destroy(&contents_header);
     string_destroy(&contents_source);

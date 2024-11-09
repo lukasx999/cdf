@@ -49,7 +49,7 @@ vec_push(vec_Vector *v, void *value) {
     assert(v != NULL);
     assert(value != NULL);
 
-    if (v->size+1 == v->_capacity) {
+    if (v->size == v->_capacity) {
         v->_capacity *= v->_growth_rate;
         v->blob = realloc(v->blob, v->_capacity * v->element_size);
         assert(v->blob != NULL);
